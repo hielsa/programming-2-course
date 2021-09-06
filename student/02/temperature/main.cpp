@@ -13,7 +13,7 @@ int main()
     C = (temp-32) / 1.8;
 
     cout << temp << " degrees Celsius is " << F << " degrees Fahrenheit" << endl;
-    cout << temp << " degrees Celsius is " << C << " degrees Celsius" << endl;
+    cout << temp << " degrees Fahrenheit is " << C << " degrees Celsius" << endl;
 
     return 0;
 }

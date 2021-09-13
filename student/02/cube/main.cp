@@ -19,11 +19,11 @@ int main()
 
         if(tarkistus == nro)
         {
-            cout << "The cube of " << nro << " is " << kuutio << endl;
+            cout << "The cube of " << nro << " is " << kuutio << "." << endl;
         }
         else
         {
-            cout << "The cube of " << nro << " is not " << kuutio << endl;
+            cout << "The cube of " << nro << " is not " << kuutio << "." << endl;
         }
     }
     return 0;

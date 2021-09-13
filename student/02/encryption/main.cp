@@ -59,7 +59,7 @@ int main()
     {
         char plain = message[i];
         char encrypted = key[plain - 'a'];
-        cout << encrypted << endl;
+        cout << encrypted;
     }
 
 

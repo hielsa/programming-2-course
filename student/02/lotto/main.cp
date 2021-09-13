@@ -38,7 +38,7 @@ int main()
     int drawn_balls;
     cout << "Enter the total number of lottery balls: ";
     cin >> lottery_balls;
-    cout << "Enter the total number of drawn balls: ";
+    cout << "Enter the number of drawn balls: ";
     cin >> drawn_balls;
 
     if(lottery_balls <= 0 || drawn_balls <= 0)
@@ -50,6 +50,12 @@ int main()
     if (lottery_balls < drawn_balls)
     {
         cout << "The maximum number of drawn balls is the total amount of balls." << endl;
+        return 0;
+    }
+
+    if (lottery_balls == drawn_balls)
+    {
+        cout << "The probability of guessing all " << drawn_balls << " balls correctly is 1/1" << endl;
         return 0;
     }
 

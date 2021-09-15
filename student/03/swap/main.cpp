@@ -3,11 +3,7 @@
 
 // Write your swap function here.
 
-
-
-#ifndef UNIT_TESTING
-
-int swap(int& i, int& j)
+void swap(int& i, int& j)
 {
     int luku1 = i;
     int luku2 = j;
@@ -15,6 +11,7 @@ int swap(int& i, int& j)
     j = luku1;
 }
 
+#ifndef UNIT_TESTING
 int main()
 {
     std::cout << "Enter an integer: ";

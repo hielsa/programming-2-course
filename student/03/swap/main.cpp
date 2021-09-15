@@ -6,6 +6,15 @@
 
 
 #ifndef UNIT_TESTING
+
+int swap(int& i, int& j)
+{
+    int luku1 = i;
+    int luku2 = j;
+    i = luku2;
+    j = luku1;
+}
+
 int main()
 {
     std::cout << "Enter an integer: ";

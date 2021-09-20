@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-Account::Account(const std::string owner, bool has_credit):
+Account::Account(const std::string& owner, bool has_credit):
     owner_(owner), has_credit_(has_credit)
 {
     generate_iban();
@@ -69,7 +69,7 @@ void Account::transfer_to(Account &A2, int transfer) {
     if (has_credit_) {
         if ((balance_ + credit_limit_) >= transfer) {
             balance_ -= transfer;
-            A2.save_money(transfer);
+            A2.balance_ += transfer;
             std::cout << transfer << " euros taken: new balance of " << iban_ << " is " << balance_ << " euros" << std::endl;
         } else {
             std::cout << "Cannot take money: credit limit overflow" << std::endl;
@@ -82,7 +82,7 @@ void Account::transfer_to(Account &A2, int transfer) {
             std::cout << "Transfer from " << iban_ << " failed" << std::endl;
         } else {
             balance_ -= transfer;
-            A2.save_money(transfer);
+            A2.balance_ += transfer;
             std::cout << transfer << " euros taken: new balance of " << iban_ << " is " << balance_ << " euros" << std::endl;
         }
     }

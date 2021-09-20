@@ -7,7 +7,7 @@ class Account
 {
 public:
     // Constructor
-    Account(const std::string owner, bool has_credit = false);
+    Account(const std::string& owner, bool has_credit = false);
     // More methods
     void print() const;
     void set_credit_limit(int limit);
@@ -23,7 +23,7 @@ private:
     static int running_number_;
 
     // More attributes/methods
-    const std::string& owner_;
+    const std::string owner_;
     bool has_credit_;
     int balance_ = 0;
     std::string iban_;

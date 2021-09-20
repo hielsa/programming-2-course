@@ -55,6 +55,3 @@ void Book::give_back()
 {
     is_loaned_ = false;
 }
-
-
-

@@ -4,7 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-    book.cp \
+    book.cpp \
         main.cpp \
     date.cpp
 

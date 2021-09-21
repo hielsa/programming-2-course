@@ -3,8 +3,31 @@
 #include <vector>
 
 
-// TODO: Implement split function here
-// Do not change main function
+std::vector<std::string> split(const std::string& text, char separator, bool ignore_empty = false)
+{
+    std::vector<std::string> parts;
+
+    std::string::size_type left = 0;
+    std::string::size_type right = text.find(separator, left);
+
+    while (right != std::string::npos)
+    {
+        std::string part = text.substr(left, right - left);
+
+        if (part != "" or !ignore_empty)
+        {
+            parts.push_back(part);
+        }
+
+        left = right + 1;
+        right = text.find(separator, left);
+    }
+
+    std::string final_part = text.substr(left, std::string::npos);
+    parts.push_back(final_part);
+
+    return parts;
+}
 
 
 int main()

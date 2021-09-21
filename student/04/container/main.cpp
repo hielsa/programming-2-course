@@ -170,7 +170,7 @@ int main()
         std::cout << "The integers are in a non-strict ascending order" << std::endl;
     else
         std::cout << "The integers are not in a non-strict ascending order" << std::endl;
-/*
+
     if(is_arithmetic_series(integers))
         std::cout << "The integers form an arithmetic series" << std::endl;
     else
@@ -180,7 +180,7 @@ int main()
         std::cout << "The integers form a geometric series" << std::endl;
     else
         std::cout << "The integers do not form a geometric series" << std::endl;
-        */
+
 
     return EXIT_SUCCESS;
 }

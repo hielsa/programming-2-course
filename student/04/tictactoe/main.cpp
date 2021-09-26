@@ -34,6 +34,19 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
+
+
+const std::string LOPETA_PELI = "Why on earth you are giving up the game?";
+const std::string PELILAUDAN_ULKOPUOLELLA = "Coordinate outside the board";
+const std::string PELI_PAATTYNYT = "Game over!";
+const std::string PELILAUTA_TAYSI = "No empty places";
+
+
+// TO DO:
+// - koordinaattien tarkistus
+// - laajennus
+// - pelilaudan tarkistus
 
 
 // Alustaa pelilaudan
@@ -70,14 +83,91 @@ void tulostaLauta(std::vector<std::vector<char>>& ruudukko,
         }
         std::cout << std::endl;
     }
+    std::cout << std::endl;
+}
+
+// Tarkistaa, onko syötteessä kirjaimia.
+// Palauttaa true jos ei, false jos on.
+bool onkoNumero(const std::string syote)
+{
+    for (char const c : syote)
+    {
+        if (std::isdigit(c) == 0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Muuttaa syötteen luvuiksi
+void muutaLuvuksi(std::string syote1,
+                 std::string syote2,
+                 int& xkoordinaatti,
+                 int& ykoordinaatti)
+{
+    std::stringstream syote1_xkoordinaatiksi;
+    std::stringstream syote2_ykoordinaatiksi;
+
+    syote1_xkoordinaatiksi << syote1;
+    syote2_ykoordinaatiksi << syote2;
+
+    syote1_xkoordinaatiksi >> xkoordinaatti;
+    syote2_ykoordinaatiksi >> ykoordinaatti;
 }
 
 int main()
 {
+    std::cout << "Start game:" << std::endl;
+
     size_t koko = 3;
     std::vector<std::vector<char>> ruudukko = {};
     init_grid(ruudukko, koko);
     tulostaLauta(ruudukko, koko);
+
+    char pelaaja1 = 'X';
+    char pelaaja2 = '0';
+    char* vuorossa = 0;
+
+    int vuoro = 1;
+    while (true)
+    {
+        if (vuoro % 2 != 0)
+        {
+            vuorossa = &pelaaja1;
+        }
+        else
+        {
+            vuorossa = &pelaaja2;
+        }
+
+        std::string syote1 = "";
+        std::string syote2 = "";
+
+        std::cout << "For " << *vuorossa << ", enter coordinates: x y> ";
+        std::cin >> syote1;
+        if (syote1 == "q")
+        {
+            std::cout << LOPETA_PELI << std::endl;
+            return EXIT_SUCCESS;
+        }
+        std::cin >> syote2;
+
+        if (!onkoNumero(syote1) || !(onkoNumero(syote2)))
+        {
+             std::cout << "Coordinate outside the board" << std::endl;
+        }
+
+        int xkoordinaatti = 0;
+        int ykoordinaatti = 0;
+
+        muutaLuvuksi(syote1, syote2, xkoordinaatti, ykoordinaatti);
+
+        std::cout << std::endl;
+
+        // tän siirto myöhemmin niihin missä ei ongelmaa
+        vuoro += 1;
+    }
 
     return EXIT_SUCCESS;
 }

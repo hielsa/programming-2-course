@@ -43,11 +43,8 @@ const std::string PAIKKA_VARATTU = "The given place is already occupied";
 const std::string PELI_PAATTYNYT = "Game over!";
 const std::string PELILAUTA_TAYSI = "No empty places";
 
-
 // TO DO:
-// - pelilaudan tarkistus
 // - laajennus
-
 
 // Alustaa pelilaudan
 void alustaLauta(std::vector<std::vector<char>>& lauta,
@@ -181,6 +178,149 @@ bool tarkistaKoordinaatit(std::vector<std::vector<char>>& lauta,
     return true;
 }
 
+// Tarkistaa, laajennetaanko lautaa. True jos laajennetaan, false jos ei.
+bool pitaakoLaajentaa(int x, int y, int koko)
+{   
+    if(x == 0 || x > koko)
+    {
+        return true;
+    }
+    if(y == 0 || y > koko)
+    {
+        return true;
+    }
+    return false;
+}
+
+// Tarkistaa onko riveillä voittajia. Jos on, palauttaa true ja tulostaa
+// voittajan. Jos ei, palauttaa false.
+bool onkoRivillaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
+{
+    for(int y = 0; y < koko; ++y )
+    {
+        if(std::equal(lauta.at(y).begin() + 1, lauta.at(y).end(),
+                      lauta.at(y).begin()))
+        {
+            if(lauta.at(y).at(0) == '.')
+            {
+                return false;
+            }
+            else if(lauta.at(y).at(0) == 'X')
+            {
+                std::cout << "Cross won horizontally" << std::endl;
+                return true;
+            }
+            else if(lauta.at(y).at(0) == '0')
+            {
+                std::cout << "Nought won horizontally" << std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Tarkistaa onko sarakkeissa voittajia. Jos on, palauttaa true ja tulostaa
+// voittajan. Jos ei, palauttaa false.
+bool onkoSarakkeessaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
+{
+    for(int x = 0; x < koko; ++x)
+    {
+        std::vector<char> sarake = {};
+        for(int y = 0; y < koko; ++y)
+        {
+            sarake.push_back(lauta.at(y).at(x));
+        }
+
+        if(std::equal(sarake.begin() + 1, sarake.end(),
+                      sarake.begin()))
+        {
+            if(sarake.at(0) == '.')
+            {
+                return false;
+            }
+            else if(sarake.at(0) == 'X')
+            {
+                std::cout << "Cross won vertically" << std::endl;
+                return true;
+
+            }
+            else if(sarake.at(0) == '0')
+            {
+                std::cout << "Nought won vertically" << std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// Tarkistaa onko diagonaalisti vasemmalta ylhäältä oikealle alas voittajia.
+// Jos on, palauttaa true ja tulostaa voittajan. Jos ei, palauttaa false.
+bool onkoDiagVoittoaYlhaaltaAlas(std::vector<std::vector<char>>& lauta,
+                                    int koko)
+{
+    std::vector<char> diagonaali = {};
+    for(int x = 0; x < koko; ++x)
+    {
+        diagonaali.push_back(lauta.at(x).at(x));
+    }
+
+    if(std::equal(diagonaali.begin() + 1, diagonaali.end(),
+                  diagonaali.begin()))
+    {
+        if(diagonaali.at(0) == '.')
+        {
+            return false;
+        }
+        else if(diagonaali.at(0) == 'X')
+        {
+            std::cout << "Cross won diagonally" << std::endl;
+            return true;
+        }
+        else if(diagonaali.at(0) == '0')
+        {
+            std::cout << "Nought won diagonally" << std::endl;
+            return true;
+        }
+    }
+    return false;
+}
+
+// Tarkistaa onko diagonaalisti oikealta ylhäältä vasemmalle alas voittajia.
+// Jos on, palauttaa true ja tulostaa voittajan. Jos ei, palauttaa false.
+bool onkoDiagVoittoaAlhaaltaYlos(std::vector<std::vector<char>>& lauta,
+                                    int koko)
+{
+    std::vector<char> diagonaali = {};
+    int y = koko - 1;
+    for(int x = 0; x < koko; ++x)
+    {
+        diagonaali.push_back(lauta.at(y).at(x));
+        y -= 1;
+    }
+
+    if(std::equal(diagonaali.begin() + 1, diagonaali.end(),
+                  diagonaali.begin()))
+    {
+        if(diagonaali.at(0) == '.')
+        {
+            return false;
+        }
+        else if(diagonaali.at(0) == 'X')
+        {
+            std::cout << "Cross won diagonally" << std::endl;
+            return true;
+        }
+        else if(diagonaali.at(0) == '0')
+        {
+            std::cout << "Nought won diagonally" << std::endl;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool onkoLautaTaynna(std::vector<std::vector<char>>& lauta, int koko)
 {
     for(int y = 1; y <= koko; ++y )
@@ -193,6 +333,7 @@ bool onkoLautaTaynna(std::vector<std::vector<char>>& lauta, int koko)
             }
         }
     }
+    std::cout << PELILAUTA_TAYSI << std::endl;
     return true;
 }
 
@@ -241,11 +382,21 @@ int main()
             if (tarkistaKoordinaatit(lauta, xkoordinaatti, ykoordinaatti, koko))
             {
 
-                // jos osuu laudalle -funktio?
-                lauta.at(ykoordinaatti - 1).at(xkoordinaatti -1 ) = *vuorossa;
-                tulostaLauta(lauta, koko);
+                if(!pitaakoLaajentaa(xkoordinaatti,ykoordinaatti, koko))
+                {
+                    std::cout << "normisijoitukseeen" << std::endl;
+                    lauta.at(ykoordinaatti - 1).at(xkoordinaatti -1 )
+                            = *vuorossa;
+                }
 
                 // laajennus
+                /*
+                else
+                {
+
+                }*/
+                tulostaLauta(lauta, koko);
+                vuoro += 1;
             }
         }
         else
@@ -253,14 +404,17 @@ int main()
             std::cout << VIRHEELLISET_KOORDINAATIT << std::endl;
         }
 
-        // Täyden laudan tarkistus
-        if(onkoLautaTaynna(lauta, koko))
+        // Laudan tarkistus
+        if(onkoRivillaVoittoa(lauta, koko) ||
+                onkoSarakkeessaVoittoa(lauta, koko) ||
+                onkoDiagVoittoaYlhaaltaAlas(lauta, koko) ||
+                onkoDiagVoittoaAlhaaltaYlos(lauta, koko) ||
+                onkoLautaTaynna(lauta, koko)
+                )
         {
-            std::cout << PELILAUTA_TAYSI << std::endl;
             std::cout << PELI_PAATTYNYT << std::endl;
             return EXIT_SUCCESS;
         }
-        else vuoro += 1;
     }
 
     return EXIT_SUCCESS;

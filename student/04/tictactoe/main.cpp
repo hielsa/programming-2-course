@@ -45,25 +45,23 @@ const std::string PELILAUTA_TAYSI = "No empty places";
 
 
 // TO DO:
-// - merkin lisäys
 // - pelilaudan tarkistus
 // - laajennus
 
 
-
 // Alustaa pelilaudan
-void alustaLauta(std::vector<std::vector<char>>& ruudukko,
+void alustaLauta(std::vector<std::vector<char>>& lauta,
                  int koko)
 {
     for (int sarake = 0; sarake < koko; ++sarake)
     {
         std::vector<char> sarake_vektori = std::vector<char>(koko, '.');
-        ruudukko.push_back(sarake_vektori);
+        lauta.push_back(sarake_vektori);
     }
 }
 
 // Tulostaa pelilaudan
-void tulostaLauta(std::vector<std::vector<char>>& ruudukko,
+void tulostaLauta(std::vector<std::vector<char>>& lauta,
                   int koko)
 {
     // sarakkeiden numeroiden tulostus
@@ -80,7 +78,7 @@ void tulostaLauta(std::vector<std::vector<char>>& ruudukko,
         std::cout << (y + 1) % 10 << ' ';
         for (int x = 0; x < koko; ++x)
         {
-            std::cout << ruudukko.at(y).at(x);
+            std::cout << lauta.at(y).at(x);
             std::cout << " ";
         }
         std::cout << std::endl;
@@ -118,8 +116,8 @@ void muutaLuvuksi(std::string syote1,
     syote2_ykoordinaatiksi >> ykoordinaatti;
 }
 
-// Tarkistaa, että x- ja y- koordinaatit osuvat ruudukkoon
-// ja että vain toinen annetuista koordinaateista ylittää ruudukon rajat.
+// Tarkistaa, että x- ja y- koordinaatit osuvat laudalle
+// ja että vain toinen annetuista koordinaateista ylittää laudan rajat.
 // Palauttaa true jos koordinaatit ovat sopivia, false jos ei.
 bool onkoKoordinaatitSopivia(int x,int y,int koko)
 {
@@ -129,15 +127,11 @@ bool onkoKoordinaatitSopivia(int x,int y,int koko)
         return false;
     }
     // Jos koordinaatit menevät ruudukon koon yli enemmän kuin yhdellä.
-    if(x > koko + 1 && y >= 0)
+    if(x > koko + 1 || y > koko + 1)
     {
         return false;
     }
-    else if(y > koko + 1 && x >= 0)
-    {
-        return false;
-    }
-    // Jos molemmaat ovat 0.
+    // Jos molemmat ovat 0.
     if(x == 0 && y == 0)
     {
         return false;
@@ -154,20 +148,20 @@ bool onkoKoordinaatitSopivia(int x,int y,int koko)
     return true;
 }
 
-// Tarkistaa, onko pelaajan antama kohta tyhjä ruudukossa.
+// Tarkistaa, onko kohta tyhjänä laudalla.
 // Palauttaa true jos on, false jos ei.
-bool onkoKohtaTyhja(std::vector<std::vector<char>>& ruudukko,
+bool onkoKohtaTyhja(std::vector<std::vector<char>>& lauta,
                     int x,int y)
 {
-    char kohta = ruudukko.at(y - 1).at(x - 1);
-    if(kohta == 'X' || kohta == '0')
+    if(lauta.at(y - 1).at(x - 1) == '.')
     {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
-bool tarkistaKoordinaatit(std::vector<std::vector<char>>& ruudukko,
+// Tarkistaa koordinaatit. Palauttaa true jos koordinaatit on ok, false jos ei.
+bool tarkistaKoordinaatit(std::vector<std::vector<char>>& lauta,
                           int x,int y, int koko)
 {
     if(!onkoKoordinaatitSopivia(x, y, koko))
@@ -178,10 +172,25 @@ bool tarkistaKoordinaatit(std::vector<std::vector<char>>& ruudukko,
     if(x <= koko && x > 0
             && y <= koko && y > 0)
     {
-        if(!onkoKohtaTyhja(ruudukko, x, y))
+        if(!onkoKohtaTyhja(lauta, x, y))
         {
             std::cout << PAIKKA_VARATTU << std::endl;
             return false;
+        }
+    }
+    return true;
+}
+
+bool onkoLautaTaynna(std::vector<std::vector<char>>& lauta, int koko)
+{
+    for(int y = 1; y <= koko; ++y )
+    {
+        for(int x = 1; x <= koko; ++x )
+        {
+            if(onkoKohtaTyhja(lauta, x, y) )
+            {
+                return false;
+            }
         }
     }
     return true;
@@ -192,9 +201,9 @@ int main()
     std::cout << "Start game:" << std::endl;
 
     int koko = 3;
-    std::vector<std::vector<char>> ruudukko = {};
-    alustaLauta(ruudukko, koko);
-    tulostaLauta(ruudukko, koko);
+    std::vector<std::vector<char>> lauta = {};
+    alustaLauta(lauta, koko);
+    tulostaLauta(lauta, koko);
 
     char pelaaja1 = 'X';
     char pelaaja2 = '0';
@@ -229,15 +238,29 @@ int main()
         if(onkoNumero(syote1) && (onkoNumero(syote2)))
         {
             muutaLuvuksi(syote1, syote2, xkoordinaatti, ykoordinaatti);
-            tarkistaKoordinaatit(ruudukko, xkoordinaatti, ykoordinaatti, koko);
+            if (tarkistaKoordinaatit(lauta, xkoordinaatti, ykoordinaatti, koko))
+            {
+
+                // jos osuu laudalle -funktio?
+                lauta.at(ykoordinaatti - 1).at(xkoordinaatti -1 ) = *vuorossa;
+                tulostaLauta(lauta, koko);
+
+                // laajennus
+            }
         }
         else
         {
             std::cout << VIRHEELLISET_KOORDINAATIT << std::endl;
         }
 
-        // tän siirto myöhemmin niihin missä ei ongelmaa
-        vuoro += 1;
+        // Täyden laudan tarkistus
+        if(onkoLautaTaynna(lauta, koko))
+        {
+            std::cout << PELILAUTA_TAYSI << std::endl;
+            std::cout << PELI_PAATTYNYT << std::endl;
+            return EXIT_SUCCESS;
+        }
+        else vuoro += 1;
     }
 
     return EXIT_SUCCESS;

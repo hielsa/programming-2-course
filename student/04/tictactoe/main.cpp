@@ -26,8 +26,6 @@
  * Käyttäjätunnus: mtelhu
  * E-Mail: elsa.huovila@tuni.fi
  *
- * Huomioita ohjelmasta ja sen toteutuksesta:
- *
  * */
 
 
@@ -36,15 +34,12 @@
 #include <string>
 #include <sstream>
 
-
+const std::string ALOITA_PELI = "Start game:";
 const std::string LOPETA_PELI = "Why on earth you are giving up the game?";
 const std::string VIRHEELLISET_KOORDINAATIT = "Coordinate outside the board";
 const std::string PAIKKA_VARATTU = "The given place is already occupied";
 const std::string PELI_PAATTYNYT = "Game over!";
 const std::string PELILAUTA_TAYSI = "No empty places";
-
-// TO DO:
-// - laajennus
 
 // Alustaa pelilaudan
 void alustaLauta(std::vector<std::vector<char>>& lauta,
@@ -128,11 +123,6 @@ bool onkoKoordinaatitSopivia(int x,int y,int koko)
     {
         return false;
     }
-    // Jos molemmat ovat 0.
-    if(x == 0 && y == 0)
-    {
-        return false;
-    }
     // Jos toinen on 0 ja toinen ylittää ruudukon
     // rajat.
     else if(x == 0 || y == 0)
@@ -192,7 +182,7 @@ bool pitaakoLaajentaa(int x, int y, int koko)
     return false;
 }
 
-// Tarkistaa onko riveillä voittajia. Jos on, palauttaa true ja tulostaa
+// Tarkistaa, onko riveillä voittajia. Jos on, palauttaa true ja tulostaa
 // voittajan. Jos ei, palauttaa false.
 bool onkoRivillaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
 {
@@ -220,7 +210,7 @@ bool onkoRivillaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
     return false;
 }
 
-// Tarkistaa onko sarakkeissa voittajia. Jos on, palauttaa true ja tulostaa
+// Tarkistaa, onko sarakkeissa voittajia. Jos on, palauttaa true ja tulostaa
 // voittajan. Jos ei, palauttaa false.
 bool onkoSarakkeessaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
 {
@@ -255,7 +245,7 @@ bool onkoSarakkeessaVoittoa(std::vector<std::vector<char>>& lauta, int koko)
     return false;
 }
 
-// Tarkistaa onko diagonaalisti vasemmalta ylhäältä oikealle alas voittajia.
+// Tarkistaa, onko diagonaalisti vasemmalta ylhäältä oikealle alas voittajia.
 // Jos on, palauttaa true ja tulostaa voittajan. Jos ei, palauttaa false.
 bool onkoDiagVoittoaYlhaaltaAlas(std::vector<std::vector<char>>& lauta,
                                     int koko)
@@ -287,7 +277,7 @@ bool onkoDiagVoittoaYlhaaltaAlas(std::vector<std::vector<char>>& lauta,
     return false;
 }
 
-// Tarkistaa onko diagonaalisti oikealta ylhäältä vasemmalle alas voittajia.
+// Tarkistaa, onko diagonaalisti oikealta ylhäältä vasemmalle alas voittajia.
 // Jos on, palauttaa true ja tulostaa voittajan. Jos ei, palauttaa false.
 bool onkoDiagVoittoaAlhaaltaYlos(std::vector<std::vector<char>>& lauta,
                                     int koko)
@@ -321,6 +311,8 @@ bool onkoDiagVoittoaAlhaaltaYlos(std::vector<std::vector<char>>& lauta,
     return false;
 }
 
+// Tarkistaa, onko kaikki laudan paikat jo täytetty. Palauttaa true
+// ja tulostaa ilmoituksen jos on, palauttaa false jos ei.
 bool onkoLautaTaynna(std::vector<std::vector<char>>& lauta, int koko)
 {
     for(int y = 1; y <= koko; ++y )
@@ -339,7 +331,7 @@ bool onkoLautaTaynna(std::vector<std::vector<char>>& lauta, int koko)
 
 int main()
 {
-    std::cout << "Start game:" << std::endl;
+    std::cout << ALOITA_PELI << std::endl;
 
     int koko = 3;
     std::vector<std::vector<char>> lauta = {};
@@ -364,47 +356,75 @@ int main()
 
         std::string syote1 = "";
         std::string syote2 = "";
-        int xkoordinaatti = 0;
-        int ykoordinaatti = 0;
+        int x = 0;
+        int y = 0;
 
         std::cout << "For " << *vuorossa << ", enter coordinates: x y> ";
         std::cin >> syote1;
+
         if(syote1 == "q")
         {
             std::cout << LOPETA_PELI << std::endl;
             return EXIT_SUCCESS;
         }
+
         std::cin >> syote2;
 
         if(onkoNumero(syote1) && (onkoNumero(syote2)))
         {
-            muutaLuvuksi(syote1, syote2, xkoordinaatti, ykoordinaatti);
-            if (tarkistaKoordinaatit(lauta, xkoordinaatti, ykoordinaatti, koko))
+            muutaLuvuksi(syote1, syote2, x, y);
+            if (tarkistaKoordinaatit(lauta, x, y, koko))
             {
-
-                if(!pitaakoLaajentaa(xkoordinaatti,ykoordinaatti, koko))
+                // Sijoitetaan merkit jos ei laajenneta lautaa.
+                if(!pitaakoLaajentaa(x, y, koko))
                 {
-                    std::cout << "normisijoitukseeen" << std::endl;
-                    lauta.at(ykoordinaatti - 1).at(xkoordinaatti -1 )
-                            = *vuorossa;
-                }
-
-                // laajennus
-                /*
+                    lauta.at(y - 1).at(x - 1) = *vuorossa;
+                }             
                 else
                 {
-
-                }*/
+                    std::vector<std::vector<char>> uusi_lauta = {};
+                    alustaLauta(uusi_lauta, koko + 1);
+                    // Laudan laajennus vasemmalle ylös.
+                    if(x == 0 || y == 0)
+                    {
+                        for(int y = 0; y < koko; ++y)
+                        {
+                            for(int x = 0; x < koko; ++x)
+                            {
+                                uusi_lauta.at(y + 1).at(x + 1)
+                                        = lauta.at(y).at(x);
+                            }
+                        }
+                        lauta = uusi_lauta;
+                        lauta.at(y).at(x) = *vuorossa;
+                    }
+                    // Laudan laajennus oikealle alas.
+                    else
+                    {
+                        for(int y = 0; y < koko; ++y)
+                        {
+                            for(int x = 0; x < koko; ++x)
+                            {
+                                uusi_lauta.at(y).at(x)
+                                        = lauta.at(y).at(x);
+                            }
+                        }
+                        lauta = uusi_lauta;
+                        lauta.at(y - 1).at(x - 1) = *vuorossa;
+                    }
+                    koko += 1;
+                }
                 tulostaLauta(lauta, koko);
                 vuoro += 1;
             }
         }
+        // Jos syötteenä muita kuin numeroita.
         else
         {
             std::cout << VIRHEELLISET_KOORDINAATIT << std::endl;
         }
 
-        // Laudan tarkistus
+        // Tarkistetaan lauta.
         if(onkoRivillaVoittoa(lauta, koko) ||
                 onkoSarakkeessaVoittoa(lauta, koko) ||
                 onkoDiagVoittoaYlhaaltaAlas(lauta, koko) ||
@@ -416,6 +436,5 @@ int main()
             return EXIT_SUCCESS;
         }
     }
-
     return EXIT_SUCCESS;
 }

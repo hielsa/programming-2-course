@@ -37,6 +37,7 @@ bool palindrome_recursive(std::string s)
           return false;
       }
   }
+  return true;
 }
 
 // Do not modify rest of the code, or the automated testing won't work.

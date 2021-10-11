@@ -10,23 +10,33 @@ bool palindrome_recursive(std::string s)
   // Do not remove RECURSIVE_FUNC declaration, it's necessary for automatic testing to work
   // ------------
 
-  if (s.length() == 1)
-  {
+  if (s.length() <= 1)
+  {            
       return true;
   }
-  else {
-      if (s.at(0) == s.at(s.length()- 1))
+  else if(s.length() == 2)
+  {
+      if (s.at(0) != s.at(s.length()- 1))
       {
-          std::string new_s = s.substr(1, s.size() - 2);
-          palindrome_recursive(new_s);
+          return false;
       }
       else
       {
-
+          return true;
+      }
+  }
+  else if(s.length() > 2)
+  {
+      if (s.at(0) == s.at(s.length()- 1))
+      {
+          std::string new_s = s.substr(1, s.length() - 2);
+          return palindrome_recursive(new_s);
+      }
+      else
+      {
           return false;
       }
   }
-  return true;
 }
 
 // Do not modify rest of the code, or the automated testing won't work.

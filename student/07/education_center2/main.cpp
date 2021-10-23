@@ -106,8 +106,8 @@ bool parse_input_lines(
         }
 
         const std::string& theme = fields.at(0);
-        const std::string& location = fields.at(1);
-        const std::string& name = fields.at(2);
+        const std::string& name = fields.at(1);
+        const std::string& location = fields.at(2);
         int enrollments = 0;
 
         if (fields.at(3) == "full")
@@ -145,19 +145,68 @@ bool parse_input_lines(
             courses_under_theme.erase(it);
         }
 
-        courses_under_theme.push_back(new_course);        
+        courses_under_theme.push_back(new_course);
     }
     return true;
 }
 
-void themes_command()
+void themes_command(std::map<std::string, std::vector<Course>>&
+                    courses_by_theme)
 {
-
+    std::map<std::string, std::vector<Course>>::iterator iter;
+    iter = courses_by_theme.begin();
+    ++iter;
+    while (iter != courses_by_theme.end() )
+    {
+        std::cout << iter->first << std::endl;
+        ++iter;
+    }
 }
 
-void courses_command()
+void courses_command(std::map<std::string, std::vector<Course>>&
+                     courses_by_theme,
+                     std::string command_location,
+                     std::string theme)
 {
+    auto iter = courses_by_theme.find(theme);
+    if (iter != courses_by_theme.end())
+    {
+        std::vector<Course> found_vector = iter->second;
+        std::map<std::string, int> found_courses = {};
+        for(auto& s : found_vector)
+        {
+            if (command_location == s.location)
+            {
+                found_courses.insert( {s.name, s.enrollments});
+            }
+            else
+            {
 
+            }
+        }
+
+        if (found_courses.empty())
+        {
+            std::cout << "Error: unknown location" << std::endl;
+        }
+
+        for (auto& pair : found_courses)
+        {
+            if (pair.second == COURSE_FULL)
+            {
+                 std::cout << pair.first << " --- full" << std::endl;
+            }
+            else
+            {
+                 std::cout << pair.first << " --- "
+                    << pair.second << " enrollments"  << std::endl;
+            }
+        }
+    }
+    else
+    {
+        std::cout << "Error: unknown theme" << std::endl;
+    }
 }
 
 void available_command()
@@ -185,26 +234,48 @@ void cancel_command()
 
 }
 
+void remove_first_word_of_command(std::string& command)
+{
+    std::stringstream ss(command);
+    std::string first_word = "";
+    ss >> first_word;
+    command = command.substr(first_word.length() + 1);
+}
+
 int ask_for_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
 {
-    std::string command = "";
+    std::string command_line = "";
     std::cout << "> " ;
-    std::getline(std::cin, command);
+    std::getline(std::cin, command_line);
+
+    std::vector<std::string> split_command =
+            split_ignoring_quoted_delim(command_line, ' ');
+    std::string command = split_command.at(0);
 
     if (command == "quit")
     {
         return QUIT_COMMAND;
     }
-    /*
     else if (command == "themes")
     {
         themes_command(courses_by_theme);
     }
+
     else if (command == "courses")
     {
-        courses_command(courses_by_theme);
+         if (split_command.size() != 3)
+         {
+             std::cout << "Error: error in command courses" << std::endl;
+         }
+         else
+         {
+             std::string location = split_command.at(1);
+             std::string theme = split_command.at(2);
+             courses_command(courses_by_theme, location, theme);
+         }
     }
+    /*
     else if (command == "available")
     {
         available_command(courses_by_theme);
@@ -228,7 +299,8 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
     */
     else
     {
-        std::cout << "Error: Unknown command: " << command << std::endl;
+        std::cout << "Error: Unknown command: " << command
+                  << std::endl;
     }
     return CONTINUE_ASKING_FOR_COMMANDS;
 }

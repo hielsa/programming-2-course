@@ -10,6 +10,8 @@
 #include <vector>
 
 const int COURSE_FULL = 50;
+const int QUIT_COMMAND = 1;
+const int CONTINUE_ASKING_FOR_COMMANDS = 2;
 const char CSV_FIELD_DELIMITER = ';';
 
 struct Course
@@ -143,16 +145,11 @@ bool parse_input_lines(
             courses_under_theme.erase(it);
         }
 
-        courses_under_theme.push_back(new_course);
-        std::cout << "Theme: " << theme << "\n"
-                  << "Name: " << name  << "\n"
-                  << "Location: " << location << "\n"
-                  << "Enrollments: " << enrollments << "\n\n";
+        courses_under_theme.push_back(new_course);        
     }
     return true;
 }
 
-/*
 void themes_command()
 {
 
@@ -187,7 +184,54 @@ void cancel_command()
 {
 
 }
-*/
+
+int ask_for_command(std::map<std::string,std::vector<Course>>&
+                    courses_by_theme)
+{
+    std::string command = "";
+    std::cout << "> " ;
+    std::getline(std::cin, command);
+
+    if (command == "quit")
+    {
+        return QUIT_COMMAND;
+    }
+    /*
+    else if (command == "themes")
+    {
+        themes_command(courses_by_theme);
+    }
+    else if (command == "courses")
+    {
+        courses_command(courses_by_theme);
+    }
+    else if (command == "available")
+    {
+        available_command(courses_by_theme);
+    }
+    else if (command == "courses_in_theme")
+    {
+        courses_in_theme_command(courses_by_theme);
+    }
+    else if (command == "courses_in_location")
+    {
+        courses_in_location_command(courses_by_theme);
+    }
+    else if (command == "favorite_theme")
+    {
+        favorite_theme_command(courses_by_theme);
+    }
+    else if (command == "cancel")
+    {
+        cancel_command(courses_by_theme);
+    }
+    */
+    else
+    {
+        std::cout << "Error: Unknown command: " << command << std::endl;
+    }
+    return CONTINUE_ASKING_FOR_COMMANDS;
+}
 
 int main()
 {    
@@ -210,6 +254,14 @@ int main()
         return EXIT_FAILURE;
     }
 
+    while (true)
+    {
+        int user_command = ask_for_command(courses_by_theme);
+        if (user_command == QUIT_COMMAND)
+        {
+            return EXIT_SUCCESS;
+        }
+    }
     return EXIT_SUCCESS;
 }
 

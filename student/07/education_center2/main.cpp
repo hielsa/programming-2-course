@@ -165,8 +165,8 @@ void themes_command(std::map<std::string, std::vector<Course>>&
 
 void courses_command(std::map<std::string, std::vector<Course>>&
                      courses_by_theme,
-                     std::string command_location,
-                     std::string theme)
+                     std::string& command_location,
+                     std::string& theme)
 {
     auto iter = courses_by_theme.find(theme);
     if (iter != courses_by_theme.end())
@@ -221,7 +221,7 @@ void available_command(std::map<std::string, std::vector<Course>>&
         {
             std::vector<Course> found_vector = iter2->second;
             std::map<std::string, std::set<std::string>>
-                    location_and_names = {};
+                    location_and_names;
             for(auto& s : found_vector)
             {
                 if (s.enrollments != COURSE_FULL)
@@ -230,35 +230,82 @@ void available_command(std::map<std::string, std::vector<Course>>&
                 }
             }
 
-            for (auto& location : location_and_names)
+            for (auto& pair : location_and_names)
             {
-                for (auto& name : location.second)
+                for (auto& name : pair.second)
                 {
-                    std::cout << theme << " : " << location.first << " : "
+                    std::cout << theme << " : " << pair.first << " : "
                               << name << std::endl;
                 }
-            }
-            if (location_and_names.empty())
-            {
-                std::cout << "Error: no available courses" << std::endl;
             }
         }
         ++iter;
     }
 }
-/*
-void courses_in_theme_command(std::map<std::string,std::vector<Course>>&
-                              courses_by_theme)
-{
 
+
+void courses_in_theme_command(std::map<std::string,std::vector<Course>>&
+                              courses_by_theme,
+                              std::string& theme)
+{
+    auto iter = courses_by_theme.find(theme);
+    if (iter != courses_by_theme.end())
+    {
+        std::vector<Course> found_vector = iter->second;
+        std::multimap<std::string, std::string> found_courses;
+        for(auto& s : found_vector)
+        {
+            found_courses.insert( {s.location, s.name});
+        }
+        for (auto& pair : found_courses)
+        {
+
+            std::cout << pair.first << " : "
+                      << pair.second << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "Error: unknown theme" << std::endl;
+    }
 }
+
 
 void courses_in_location_command(std::map<std::string,std::vector<Course>>&
-                                 courses_by_theme)
+                                 courses_by_theme,
+                                 std::string command_location)
 {
+    std::map<std::string, std::vector<Course>>::iterator iter;
+    iter = courses_by_theme.begin();
+    std::vector<std::string> found_courses = {};
+    ++iter;
 
+    while (iter != courses_by_theme.end() )
+    {
+        std::vector<Course> found_vector = iter->second;
+
+        for(auto& s : found_vector)
+        {
+            if (command_location == s.location)
+            {
+                found_courses.push_back(s.name);
+            }
+        }
+        ++iter;
+    }
+
+    sort(found_courses.begin(), found_courses.end());
+    if (!found_courses.empty())
+    {
+        for (std::string& s : found_courses)
+        {
+            std::cout << s << std::endl;
+        }
+    }
+    else std::cout << "Error: unknown location" << std::endl;
 }
 
+/*
 void favorite_theme_command(std::map<std::string,std::vector<Course>>&
                             courses_by_theme)
 {
@@ -271,6 +318,7 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
 
 }
 */
+
 int ask_for_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
 {
@@ -282,6 +330,7 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
             split_ignoring_quoted_delim(command_line, ' ');
     std::string command = split_command.at(0);
 
+    // vaihda funktio booliin ja return false?
     if (command == "quit")
     {
         return QUIT_COMMAND;
@@ -290,7 +339,7 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
     {
         themes_command(courses_by_theme);
     }
-    else if (command == "courses" && split_command.size() == 1)
+    else if (command == "courses")
     {
          if (split_command.size() != 3)
          {
@@ -307,7 +356,6 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
     {
         available_command(courses_by_theme);
     }
-    /*
     else if (command == "courses_in_theme")
     {
         if (split_command.size() != 2)
@@ -316,9 +364,10 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
         }
         else
         {
-            courses_in_theme_command(courses_by_theme);
+            std::string theme = split_command.at(1);
+            courses_in_theme_command(courses_by_theme, theme);
         }
-    }
+    }    
     else if (command == "courses_in_location")
     {
         if (split_command.size() != 2)
@@ -327,9 +376,11 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
         }
         else
         {
-            courses_in_location_command(courses_by_theme);
+            std::string location = split_command.at(1);
+            courses_in_location_command(courses_by_theme, location);
         }
     }
+    /*
     else if (command == "favorite_theme" && split_command.size() == 1)
     {
         favorite_theme_command(courses_by_theme);

@@ -10,8 +10,6 @@
 #include <vector>
 
 const int COURSE_FULL = 50;
-const int QUIT_COMMAND = 1;
-const int CONTINUE_ASKING_FOR_COMMANDS = 2;
 const char CSV_FIELD_DELIMITER = ';';
 
 struct Course
@@ -277,8 +275,8 @@ void courses_in_location_command(std::map<std::string,std::vector<Course>>&
 {
     std::map<std::string, std::vector<Course>>::iterator iter;
     iter = courses_by_theme.begin();
-    std::vector<std::string> found_courses = {};
     ++iter;
+    std::vector<std::string> found_courses = {};
 
     while (iter != courses_by_theme.end() )
     {
@@ -305,13 +303,66 @@ void courses_in_location_command(std::map<std::string,std::vector<Course>>&
     else std::cout << "Error: unknown location" << std::endl;
 }
 
-/*
+bool compare_pairs(std::pair<std::string, int>&a,
+                   std::pair<std::string, int>&b)
+{
+    return a.second > b.second;
+}
+
 void favorite_theme_command(std::map<std::string,std::vector<Course>>&
                             courses_by_theme)
 {
+    if (!courses_by_theme.empty())
+    {
+        std::map<std::string, std::vector<Course>>::iterator iter;
+        iter = courses_by_theme.begin();
+        ++iter;
+        std::vector<std::pair<std::string, int>> themes_with_enrollements;
 
+        while (iter != courses_by_theme.end() )
+        {
+            std::string theme = iter->first;
+
+            auto iter2 = courses_by_theme.find(theme);
+            int total_enrollments = 0;
+
+            if (iter2 != courses_by_theme.end())
+            {
+                std::vector<Course> found_vector = iter2->second;
+                for(auto& s : found_vector)
+                {
+                    total_enrollments += s.enrollments;
+                }
+            }
+            themes_with_enrollements.push_back({theme, total_enrollments});
+
+            ++iter;
+        }
+
+        sort(themes_with_enrollements.begin(), themes_with_enrollements.end(),
+             compare_pairs);
+
+        if (!themes_with_enrollements.empty())
+        {
+            std::cout << themes_with_enrollements[0].second
+                      << " enrollments in themes" <<  std::endl;
+
+            auto iter2 = themes_with_enrollements.begin();
+
+            while (iter2 != themes_with_enrollements.end())
+            {
+                if (themes_with_enrollements[0].second == iter2[0].second)
+                {
+                    std::cout << "--- " << iter2[0].first <<  std::endl;
+                }
+                ++iter2;
+            }
+        }
+    }
+    else std::cout << "No enrollments" << std::endl;
 }
 
+/*
 void cancel_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
 {
@@ -319,7 +370,7 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
 }
 */
 
-int ask_for_command(std::map<std::string,std::vector<Course>>&
+bool ask_for_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
 {
     std::string command_line = "";
@@ -330,10 +381,9 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
             split_ignoring_quoted_delim(command_line, ' ');
     std::string command = split_command.at(0);
 
-    // vaihda funktio booliin ja return false?
     if (command == "quit")
     {
-        return QUIT_COMMAND;
+        return false;
     }
     else if (command == "themes" && split_command.size() == 1)
     {
@@ -380,11 +430,11 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
             courses_in_location_command(courses_by_theme, location);
         }
     }
-    /*
     else if (command == "favorite_theme" && split_command.size() == 1)
     {
         favorite_theme_command(courses_by_theme);
     }
+    /*
     else if (command == "cancel")
     {
         if (split_command.size() != 2)
@@ -402,7 +452,7 @@ int ask_for_command(std::map<std::string,std::vector<Course>>&
         std::cout << "Error: Unknown command: " << command
                   << std::endl;
     }
-    return CONTINUE_ASKING_FOR_COMMANDS;
+    return true;
 }
 
 int main()
@@ -428,8 +478,7 @@ int main()
 
     while (true)
     {
-        int user_command = ask_for_command(courses_by_theme);
-        if (user_command == QUIT_COMMAND)
+        if (!ask_for_command(courses_by_theme))
         {
             return EXIT_SUCCESS;
         }

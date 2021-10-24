@@ -370,7 +370,11 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme,
                     std::string course)
 {
-
+    if (courses_by_theme.empty())
+    {
+        std::cout << "Error: unknown course" << std::endl;
+        return;
+    }
     std::map<std::string, std::vector<Course>>::iterator map_it;
     map_it = courses_by_theme.begin();
     ++map_it;
@@ -392,12 +396,12 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
         ++map_it;
     }
 
-    if (counter > 0)
+    if (counter == 0)
     {
-        std::cout << course
-                  << " cancelled in all locations" << std::endl;
+        std::cout << "Error: unknown course" << std::endl;
     }
-    else  std::cout << "Error: unknown course" << std::endl;
+    else  std::cout << course
+                    << " cancelled in all locations" << std::endl;
 }
 
 

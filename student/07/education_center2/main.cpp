@@ -89,7 +89,7 @@ bool validate_no_empty_fields(const std::vector<std::string>& fields)
 }
 
 bool parse_input_lines(
-        const std::vector<std::string>& lines,
+        std::vector<std::string>& lines,
         std::map<std::string, std::vector<Course>>& courses_by_theme)
 {
     for (const std::string& line : lines)
@@ -103,9 +103,9 @@ bool parse_input_lines(
                 return false;
         }
 
-        const std::string& theme = fields.at(0);
-        const std::string& name = fields.at(1);
-        const std::string& location = fields.at(2);
+        std::string& theme = fields.at(0);
+        std::string& name = fields.at(1);
+        std::string& location = fields.at(2);
         int enrollments = 0;
 
         if (fields.at(3) == "full")
@@ -151,6 +151,8 @@ bool parse_input_lines(
 void themes_command(std::map<std::string, std::vector<Course>>&
                     courses_by_theme)
 {
+    if (courses_by_theme.empty()) return;
+
     std::map<std::string, std::vector<Course>>::iterator iter;
     iter = courses_by_theme.begin();
     ++iter;
@@ -206,6 +208,8 @@ void courses_command(std::map<std::string, std::vector<Course>>&
 void available_command(std::map<std::string, std::vector<Course>>&
                        courses_by_theme)
 {
+    if (courses_by_theme.empty()) return;
+
     std::map<std::string, std::vector<Course>>::iterator iter;
     iter = courses_by_theme.begin();
     ++iter;
@@ -281,7 +285,6 @@ void courses_in_location_command(std::map<std::string,std::vector<Course>>&
     while (iter != courses_by_theme.end() )
     {
         std::vector<Course> found_vector = iter->second;
-
         for(auto& s : found_vector)
         {
             if (command_location == s.location)
@@ -362,13 +365,41 @@ void favorite_theme_command(std::map<std::string,std::vector<Course>>&
     else std::cout << "No enrollments" << std::endl;
 }
 
-/*
+
 void cancel_command(std::map<std::string,std::vector<Course>>&
-                    courses_by_theme)
+                    courses_by_theme,
+                    std::string course)
 {
 
+    std::map<std::string, std::vector<Course>>::iterator map_it;
+    map_it = courses_by_theme.begin();
+    ++map_it;
+    int counter = 0;
+    while (map_it != courses_by_theme.end() )
+    {
+        std::vector<Course>::iterator vec_it;
+        vec_it = map_it->second.begin();
+        for (; vec_it != (*map_it).second.end();)
+        {
+            if (course == vec_it->name)
+            {
+                vec_it = map_it->second.erase(vec_it);
+                ++counter;
+            }
+            else
+            ++vec_it;
+        }
+        ++map_it;
+    }
+
+    if (counter > 0)
+    {
+        std::cout << course
+                  << " cancelled in all locations" << std::endl;
+    }
+    else  std::cout << "Error: unknown course" << std::endl;
 }
-*/
+
 
 bool ask_for_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
@@ -376,6 +407,11 @@ bool ask_for_command(std::map<std::string,std::vector<Course>>&
     std::string command_line = "";
     std::cout << "> " ;
     std::getline(std::cin, command_line);
+
+    if (command_line == "")
+    {
+        return true;
+    }
 
     std::vector<std::string> split_command =
             split_ignoring_quoted_delim(command_line, ' ');
@@ -433,8 +469,7 @@ bool ask_for_command(std::map<std::string,std::vector<Course>>&
     else if (command == "favorite_theme" && split_command.size() == 1)
     {
         favorite_theme_command(courses_by_theme);
-    }
-    /*
+    }    
     else if (command == "cancel")
     {
         if (split_command.size() != 2)
@@ -443,10 +478,10 @@ bool ask_for_command(std::map<std::string,std::vector<Course>>&
         }
         else
         {
-            cancel_command(courses_by_theme);
+            std::string course = split_command.at(1);
+            cancel_command(courses_by_theme, course);
         }
     }
-*/
     else
     {
         std::cout << "Error: Unknown command: " << command

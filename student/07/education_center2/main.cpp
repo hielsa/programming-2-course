@@ -1,4 +1,39 @@
-//--------------------------------------------------
+/* Education center
+ *
+ * Desc:
+ *  This program implements a program that reads the course collection
+ *data of different education centers from a file at startup, stores
+ *them in a suitable data sructure and gives the user the opportunity to
+ *search the data structure in question.
+ * At first, asks the user for the name of the file. If the file is not found
+ *or it does not correspond to the definition, an error message is given
+ *and the program terminates. Otherwise, the program reads the file and
+ *stores the data into a data structure, after which the the user can give
+ *seven different commands to the program:
+ *
+ *  themes - prints all known themes
+ *  courses <location> <theme> - prints all the courses in a given theme and
+ *location, and the number of participants.
+ *  available - prints the themes, locations, and course names of all non-full
+ *courses.
+ *  courses_in_theme <theme> - prints all courses under the given theme in all
+ *locations.
+ *  courses_in_location <location> prints all courses in a given location
+ *  favorite_theme - prints the number of participants and the name of the most
+ *popular theme(s), based on the total number of participants.
+ *  cancel <course> cancels the given course in all locations.
+ *  quit - the program terminates without printing anything.
+ *
+ * If the user command is none of the above, or the command is incomplete or has
+ *an incorrect theme, course, or location, the program prints an error message.
+ *
+ * Program author
+ * Name: Elsa Huovila
+ * Student number: 50264838
+ * UserID: mtelhu
+ * Email: elsa.huovila@tuni.fi
+ *
+ * */
 
 #include <algorithm>
 #include <fstream>
@@ -10,6 +45,7 @@
 #include <vector>
 
 const int COURSE_FULL = 50;
+const int VALID_FIELD_COUNT = 4;
 const char CSV_FIELD_DELIMITER = ';';
 
 struct Course
@@ -50,6 +86,8 @@ std::vector<std::string> split_ignoring_quoted_delim(const std::string& str,
     return result;
 }
 
+// Reads the input file line by line. If the file can't be opened
+// returns false, otherwise true.
 bool read_input_file(const std::string& filepath,
                      std::vector<std::string>& lines)
 {
@@ -67,15 +105,19 @@ bool read_input_file(const std::string& filepath,
     return true;
 }
 
+// Validates the field count of a line. Returns false if the field size
+// is other than 4, otherwise returns true.
 bool validate_field_count(const std::vector<std::string>& fields)
 {
-    if (fields.size() != 4) // tallennus vakioihin?
+    if (fields.size() != VALID_FIELD_COUNT)
     {
         return false;
     }
     return true;
 }
 
+// Validates there are no fields filled with spaces. Returns false if there is,
+// otherwise returns true.
 bool validate_no_empty_fields(const std::vector<std::string>& fields)
 {
     for (const auto& field : fields)
@@ -88,6 +130,7 @@ bool validate_no_empty_fields(const std::vector<std::string>& fields)
     return true;
 }
 
+// Stores the data to the structure
 bool parse_input_lines(
         std::vector<std::string>& lines,
         std::map<std::string, std::vector<Course>>& courses_by_theme)
@@ -103,11 +146,12 @@ bool parse_input_lines(
                 return false;
         }
 
-        std::string& theme = fields.at(0);
-        std::string& name = fields.at(1);
-        std::string& location = fields.at(2);
+        const std::string& theme = fields.at(0);
+        const std::string& name = fields.at(1);
+        const std::string& location = fields.at(2);
         int enrollments = 0;
 
+        // change the enrollments to "full" if there are 50 enrollments.
         if (fields.at(3) == "full")
         {
             enrollments = COURSE_FULL;
@@ -138,6 +182,7 @@ bool parse_input_lines(
             }
         }
 
+        // remove duplicates
         if (it != courses_under_theme.end())
         {
             courses_under_theme.erase(it);
@@ -148,6 +193,8 @@ bool parse_input_lines(
     return true;
 }
 
+// Prints all themes in alphabetical order. If there are no themes,
+// returns without printing.
 void themes_command(std::map<std::string, std::vector<Course>>&
                     courses_by_theme)
 {
@@ -163,6 +210,9 @@ void themes_command(std::map<std::string, std::vector<Course>>&
     }
 }
 
+// Prints all the courses in a theme and location, and the number of
+// participants. If the course has 50 enrollments, prints that the course
+// is full. Error message is printed if the theme or location is unknown.
 void courses_command(std::map<std::string, std::vector<Course>>&
                      courses_by_theme,
                      std::string& command_location,
@@ -173,6 +223,7 @@ void courses_command(std::map<std::string, std::vector<Course>>&
     {
         std::vector<Course> found_vector = iter->second;
         std::map<std::string, int> found_courses = {};
+
         for(auto& s : found_vector)
         {
             if (command_location == s.location)
@@ -205,6 +256,10 @@ void courses_command(std::map<std::string, std::vector<Course>>&
     }
 }
 
+// Prints the themes, locations, and course names of all non-full courses.
+// The output is a single alphabetically ordered list, where the list elements
+// are firstly ordered by themes, secondly by locations, and thirdly by
+// course names. If the input file is empty, returns without printing.
 void available_command(std::map<std::string, std::vector<Course>>&
                        courses_by_theme)
 {
@@ -245,7 +300,9 @@ void available_command(std::map<std::string, std::vector<Course>>&
     }
 }
 
-
+// Prints all courses under the given theme in all locations.The locations are
+// listed an alphabetical order and courses in the order they have been listed
+// in the input file. Error message is printed if the theme is unknown.
 void courses_in_theme_command(std::map<std::string,std::vector<Course>>&
                               courses_by_theme,
                               std::string& theme)
@@ -272,7 +329,8 @@ void courses_in_theme_command(std::map<std::string,std::vector<Course>>&
     }
 }
 
-
+// Prints all courses in a location in alphabetical order.
+// Error message is printed if the location is unknown.
 void courses_in_location_command(std::map<std::string,std::vector<Course>>&
                                  courses_by_theme,
                                  std::string command_location)
@@ -280,6 +338,7 @@ void courses_in_location_command(std::map<std::string,std::vector<Course>>&
     std::map<std::string, std::vector<Course>>::iterator iter;
     iter = courses_by_theme.begin();
     ++iter;
+
     std::vector<std::string> found_courses = {};
 
     while (iter != courses_by_theme.end() )
@@ -296,22 +355,28 @@ void courses_in_location_command(std::map<std::string,std::vector<Course>>&
     }
 
     sort(found_courses.begin(), found_courses.end());
+
     if (!found_courses.empty())
     {
-        for (std::string& s : found_courses)
+        for (std::string& course : found_courses)
         {
-            std::cout << s << std::endl;
+            std::cout << course << std::endl;
         }
     }
     else std::cout << "Error: unknown location" << std::endl;
 }
 
+
+// Sorts the vector with themes and enrollments by the amount of enrollments.
 bool compare_pairs(std::pair<std::string, int>&a,
                    std::pair<std::string, int>&b)
 {
     return a.second > b.second;
 }
 
+// Prints the number of participants and the name of the most popular theme(s),
+// based on the total number of participants. If the file is empty, prints
+// a message.
 void favorite_theme_command(std::map<std::string,std::vector<Course>>&
                             courses_by_theme)
 {
@@ -352,6 +417,8 @@ void favorite_theme_command(std::map<std::string,std::vector<Course>>&
 
             auto iter2 = themes_with_enrollements.begin();
 
+            // prints all the themes with the same amount of enrollments
+            // as the one with the most enrollments.
             while (iter2 != themes_with_enrollements.end())
             {
                 if (themes_with_enrollements[0].second == iter2[0].second)
@@ -365,7 +432,8 @@ void favorite_theme_command(std::map<std::string,std::vector<Course>>&
     else std::cout << "No enrollments" << std::endl;
 }
 
-
+// Cancels the course in all locations. Prints an error message if
+// the course is unknown or if the file is empty.
 void cancel_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme,
                     std::string course)
@@ -378,7 +446,10 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
     std::map<std::string, std::vector<Course>>::iterator map_it;
     map_it = courses_by_theme.begin();
     ++map_it;
+
+    // counter to count how many courses are to be cancelled
     int counter = 0;
+
     while (map_it != courses_by_theme.end() )
     {
         std::vector<Course>::iterator vec_it;
@@ -404,7 +475,9 @@ void cancel_command(std::map<std::string,std::vector<Course>>&
                     << " cancelled in all locations" << std::endl;
 }
 
-
+// Asks the user for command. Prints an error message if the command is invalid,
+// i.e. the command is too short, long, or unknown. If the command is empty,
+// continues asking.
 bool ask_for_command(std::map<std::string,std::vector<Course>>&
                     courses_by_theme)
 {
@@ -509,12 +582,15 @@ int main()
 
     std::map<std::string, std::vector<Course>> courses_by_theme;
 
+    // store the data. If the fields are empty or the field count is invalid,
+    // terminate the program.
     if (!parse_input_lines(input_file_lines, courses_by_theme))
     {
         std::cerr << "Error: empty field\n";
         return EXIT_FAILURE;
     }
 
+    // continue printing the prompt until the user gives the command 'quit'
     while (true)
     {
         if (!ask_for_command(courses_by_theme))

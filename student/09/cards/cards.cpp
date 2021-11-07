@@ -1,6 +1,5 @@
 #include "cards.hh"
 
-#include <cassert>
 
 Cards::Cards() :
     size_(0),

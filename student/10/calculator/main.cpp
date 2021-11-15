@@ -112,7 +112,7 @@ int main() {
         {
             if (pieces.size() != 1)
             {
-                std::cout << "Error: unknown command.\n";
+                std::cout << "Error: wrong number of parameters.\n";
                 continue;
             }
             else

@@ -110,7 +110,16 @@ int main() {
 
         if (it->is_exit)
         {
-            std::cout << GREETING_AT_END << endl;
+            if (pieces.size() != 1)
+            {
+                std::cout << "Error: unknown command.\n";
+                continue;
+            }
+            else
+            {
+                std::cout << GREETING_AT_END << endl;
+                return EXIT_SUCCESS;
+            }
         }
 
         if (pieces.size() - 1 != it->parameter_number)
@@ -133,6 +142,7 @@ int main() {
 
         std::cout << it->action(left, right) << "\n";
     }
+    return EXIT_SUCCESS;
 }
 
 
